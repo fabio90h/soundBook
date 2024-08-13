@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { soundLibrary } from "./data";
+import { pagesSounds } from "./data";
 
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import styled from "styled-components";
+import { Card } from "./Card";
 
 const responsive = {
   superLargeDesktop: {
@@ -25,28 +25,36 @@ const responsive = {
   },
 };
 
-const Card = styled.div`
-  border: 1px solid red;
-`;
+/**
+ * TODO:
+ * - Change the custom button from play to pause
+ * - Need to add image to the pages (need to remove the text)
+ * - Custom Button to be on the bottom of the page
+ * - Custom Button changes color when completed
+ *
+ * - Main button plays and goes to the next track [DONE]
+ * - Swipe right goes to the next page [DONE]
+ * - Option to select the next sound manually [DONE]
+ *
+ * - When track is done it has to vibrate the phone.
+ */
 
 const Sound: React.FC<{}> = () => {
-  const [play, setPlay] = useState(false);
-
-  const handleSoundButton = (index: number) => {
-    const audio = document.getElementById(
-      `audio_tag_${index}`
-    ) as HTMLAudioElement;
-    play ? setPlay(false) : setPlay(true);
-    play && audio ? audio.pause() : audio!.play();
-  };
+  const [counter, setCounter] = useState(0);
+  const [wasSwiped, setWasSwiped] = useState(false);
 
   const handleAfterSwipe = (previousSlide: number) => {
     const audio = document.getElementById(
-      `audio_tag_${previousSlide}`
+      `audio_tag_page${previousSlide}-${counter}`
     ) as HTMLAudioElement;
 
-    audio.pause();
-    audio.currentTime = 0;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+
+    setWasSwiped(true);
+    setCounter(0);
   };
 
   return (
@@ -55,14 +63,19 @@ const Sound: React.FC<{}> = () => {
       swipeable={true}
       draggable={true}
       removeArrowOnDeviceType={["tablet", "mobile"]}
-      afterChange={(previousSlide, state) => handleAfterSwipe(previousSlide)}
+      afterChange={(previousSlide) => handleAfterSwipe(previousSlide)}
     >
-      {soundLibrary.map((sound, index) => {
+      {pagesSounds.map((pageSounds, index) => {
         return (
-          <Card key={`sound-${index}`}>
-            <button onClick={() => handleSoundButton(index)}>hello</button>
-            <audio controls id={`audio_tag_${index}`} src={sound} />
-          </Card>
+          <Card
+            key={index}
+            pageSounds={pageSounds}
+            pageNumber={index}
+            wasSwiped={wasSwiped}
+            setWasSwiped={setWasSwiped}
+            counter={counter}
+            setCounter={setCounter}
+          />
         );
       })}
     </Carousel>
