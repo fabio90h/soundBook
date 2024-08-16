@@ -68,6 +68,7 @@ const Sound: React.FC<{}> = () => {
       responsive={responsive}
       swipeable={true}
       draggable={true}
+      partialVisible={false}
       removeArrowOnDeviceType={["tablet", "mobile"]}
       afterChange={(previousSlide) => handleAfterSwipe(previousSlide)}
     >
