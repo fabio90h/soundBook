@@ -1,23 +1,29 @@
 import React, { useState } from "react";
-import { pagesSounds } from "./data";
+import { pagesAssets } from "./data";
 
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { Card } from "./Card";
+import styled from "styled-components";
+
+const PageContainer = styled.div`
+  display: flex;
+  justify-content: center;
+`;
 
 const responsive = {
   superLargeDesktop: {
     // the naming can be any, depends on you.
     breakpoint: { max: 4000, min: 3000 },
-    items: 5,
+    items: 1,
   },
   desktop: {
     breakpoint: { max: 3000, min: 1024 },
-    items: 3,
+    items: 1,
   },
   tablet: {
     breakpoint: { max: 1024, min: 464 },
-    items: 2,
+    items: 1,
   },
   mobile: {
     breakpoint: { max: 464, min: 0 },
@@ -62,14 +68,16 @@ const Sound: React.FC<{}> = () => {
       responsive={responsive}
       swipeable={true}
       draggable={true}
+      partialVisible={false}
       removeArrowOnDeviceType={["tablet", "mobile"]}
       afterChange={(previousSlide) => handleAfterSwipe(previousSlide)}
     >
-      {pagesSounds.map((pageSounds, index) => {
+      {pagesAssets.map((pageAsset, index) => {
         return (
           <Card
             key={index}
-            pageSounds={pageSounds}
+            pageSounds={pageAsset.sounds}
+            imageSrc={pageAsset.imageSrc}
             pageNumber={index}
             wasSwiped={wasSwiped}
             setWasSwiped={setWasSwiped}
