@@ -4,6 +4,8 @@ import Replay from "./play-icon-rotate.svg";
 import Play from "./play-solid-icon.svg";
 import Stop from "./stop-icon-solid.svg";
 
+import { PlayButton } from "./PlayButton";
+
 const CardWrapper = styled.div`
   background: #eef3f7;
   display: flex;
@@ -36,6 +38,9 @@ const ImageWrapper = styled.div<{ $url: string }>`
 
   background-image: url(${(props) => props.$url});
   background-repeat: no-repeat;
+  background-size: cover;
+  background-position: unset;
+
   background-size: cover;
   background-position: center;
 
@@ -79,14 +84,28 @@ const Table = styled.div`
 
   z-index: 1;
 
-  margin-bottom: 15px;
-
-  height: 14vh;
+  height: 10vh;
 `;
 
-const Icon = styled.img`
+const Icon = styled.img<{ disabled: boolean }>`
   width: 20px;
   height: 20px;
+
+  cursor: ${(props) => (props.disabled ? "mouse" : "pointer")};
+`;
+
+const PlayBackdrop = styled.div`
+  backdrop-filter: blur(7px);
+  border-radius: 15px;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  z-index: 100;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: end;
 `;
 
 const Player = styled.div`
@@ -95,6 +114,21 @@ const Player = styled.div`
   align-items: center;
   justify-content: center;
   gap: 10px;
+`;
+
+const CircleOfCompletionContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 25px;
+`;
+
+const CircleOfCompletion = styled.div<{ completed: boolean }>`
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  background-color: ${(props) => (props.completed ? "#9dd6a1" : "#ddddf4")};
 `;
 
 const ProgressBar = styled.progress<{ $done: boolean }>`
@@ -146,7 +180,6 @@ export const Card: React.FC<{
   const [playedArray, setPlayedArray] = React.useState(new Set());
 
   const limit = pageSounds.length;
-  // TODO: Only play one track at a time DISABLE
 
   const handleOnClick = (index = counter) => {
     if (index === limit) return;
@@ -155,7 +188,7 @@ export const Card: React.FC<{
       `audio_tag_page${pageNumber}-${index}`
     ) as HTMLAudioElement;
 
-    console.log(`audio_tag_page${pageNumber}-${index}`);
+    console.log(`audio_tag_page${pageNumber}-${index}`, limit, playedArray);
 
     if (indexPlaying === index) {
       audio.pause();
@@ -212,8 +245,26 @@ export const Card: React.FC<{
   return (
     <CardWrapper id={`${pageNumber}`}>
       <Cover>
-        <ImageWrapper $url={imageSrc} />
+        <ImageWrapper $url={imageSrc}>
+          <PlayBackdrop>
+            <PlayButton
+              onClick={() => handleOnClick()}
+              playing={indexPlaying === -1}
+              done={playedArray.size === limit}
+            />
+            <CircleOfCompletionContainer>
+              {pageSounds.map((sound, index) => (
+                <CircleOfCompletion
+                  completed={playedArray.has(
+                    `audio_tag_page${pageNumber}-${index}`
+                  )}
+                />
+              ))}
+            </CircleOfCompletionContainer>
+          </PlayBackdrop>
+        </ImageWrapper>
       </Cover>
+
       {/* <button disabled={counter === limit} onClick={() => handleOnClick()}>
         MAIN
       </button> */}
@@ -223,6 +274,7 @@ export const Card: React.FC<{
             <Player>
               <audio id={`audio_tag_page${pageNumber}-${index}`} src={sound} />
               <Icon
+                disabled={indexPlaying !== -1 && indexPlaying !== index}
                 src={determineState(index, Stop, Replay, Play) as string}
                 onClick={
                   indexPlaying !== -1 && indexPlaying !== index // Something is playing and it is not the one clicked

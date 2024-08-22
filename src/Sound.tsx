@@ -4,12 +4,6 @@ import { pagesAssets } from "./data";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { Card } from "./Card";
-import styled from "styled-components";
-
-const PageContainer = styled.div`
-  display: flex;
-  justify-content: center;
-`;
 
 const responsive = {
   superLargeDesktop: {
