@@ -1,7 +1,7 @@
 {
   "name": "sound-book",
   "version": "0.1.0",
-  "homepage": "https://fabio90h.github.io/soundBook/",
+  "homepage": "https://sound-book-player.com",
   "private": "false",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
