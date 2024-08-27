@@ -19,6 +19,8 @@ const CardWrapper = styled.div`
   margin: auto;
   margin-top: 30vh;
   margin-bottom: 75px;
+
+  max-height: 400px;
   max-width: 600px;
 `;
 
@@ -27,9 +29,9 @@ const Cover = styled.div`
   position: relative;
   border-radius: 15px;
   z-index: 1;
-  margin-top: -8vh;
+  margin-top: -80px;
 
-  height: 35vh;
+  height: 300px;
 `;
 
 const ImageWrapper = styled.div<{ $url: string }>`
@@ -38,9 +40,6 @@ const ImageWrapper = styled.div<{ $url: string }>`
 
   background-image: url(${(props) => props.$url});
   background-repeat: no-repeat;
-  background-size: cover;
-  background-position: unset;
-
   background-size: cover;
   background-position: center;
 
@@ -84,7 +83,7 @@ const Table = styled.div`
 
   z-index: 1;
 
-  height: 10vh;
+  height: 100px;
 `;
 
 const Icon = styled.img<{ disabled: boolean }>`
@@ -95,7 +94,11 @@ const Icon = styled.img<{ disabled: boolean }>`
 `;
 
 const PlayBackdrop = styled.div`
-  backdrop-filter: blur(7px);
+  -o-backdrop-filter: blur(4.5px);
+  -moz-backdrop-filter: blur(4.5px);
+  -webkit-backdrop-filter: blur(4.5px);
+  backdrop-filter: blur(4.5px);
+
   border-radius: 15px;
   height: 100%;
   width: 100%;
@@ -103,13 +106,13 @@ const PlayBackdrop = styled.div`
   z-index: 100;
 
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
-  align-items: end;
+  align-items: center;
 `;
 
 const Player = styled.div`
-  height: 5vh;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,7 +124,6 @@ const CircleOfCompletionContainer = styled.div`
   flex-direction: row;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 25px;
 `;
 
 const CircleOfCompletion = styled.div<{ completed: boolean }>`
@@ -187,8 +189,6 @@ export const Card: React.FC<{
     const audio = document.getElementById(
       `audio_tag_page${pageNumber}-${index}`
     ) as HTMLAudioElement;
-
-    console.log(`audio_tag_page${pageNumber}-${index}`, limit, playedArray);
 
     if (indexPlaying === index) {
       audio.pause();
@@ -264,10 +264,6 @@ export const Card: React.FC<{
           </PlayBackdrop>
         </ImageWrapper>
       </Cover>
-
-      {/* <button disabled={counter === limit} onClick={() => handleOnClick()}>
-        MAIN
-      </button> */}
       <Table>
         {pageSounds.map((sound, index) => (
           <>

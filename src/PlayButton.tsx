@@ -16,21 +16,16 @@ const Liner = styled.span`
 `;
 
 const PlayButtonWrapper = styled.div<{ open: boolean; next: boolean }>`
-  /* border: 1px solid red; */
-
   width: 40px;
   height: 40px;
 
-  margin: 50px auto;
+  margin: 75px auto;
   z-index: 100;
 
   width: 40px;
   height: 40px;
 
-  position: absolute;
-
-  left: 45%;
-  top: 20%;
+  position: relative;
 
   cursor: ${(props) => (props.next ? "mouse" : "pointer")};
 
