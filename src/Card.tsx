@@ -17,7 +17,7 @@ const CardWrapper = styled.div`
   padding: 30px;
   width: 90%;
   margin: auto;
-  margin-top: 30vh;
+  margin-top: 20vh;
   margin-bottom: 75px;
 
   max-height: 400px;
@@ -40,7 +40,7 @@ const ImageWrapper = styled.div<{ $url: string }>`
 
   background-image: url(${(props) => props.$url});
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 110%;
   background-position: center;
 
   flex-shrink: 0;
@@ -156,6 +156,12 @@ const HorizontalLine = styled.hr`
   opacity: 0.6;
 `;
 
+const PageNumber = styled.h4`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 export const Card: React.FC<{
   pageNumber: number;
   pageSounds: string[];
@@ -243,58 +249,66 @@ export const Card: React.FC<{
   }, [setWasSwiped, wasSwiped]);
 
   return (
-    <CardWrapper id={`${pageNumber}`}>
-      <Cover>
-        <ImageWrapper $url={imageSrc}>
-          <PlayBackdrop>
-            <PlayButton
-              onClick={() => handleOnClick()}
-              playing={indexPlaying === -1}
-              done={playedArray.size === limit}
-            />
-            <CircleOfCompletionContainer>
-              {pageSounds.map((sound, index) => (
-                <CircleOfCompletion
-                  completed={playedArray.has(
+    <>
+      <CardWrapper id={`${pageNumber}`}>
+        <Cover>
+          <ImageWrapper $url={imageSrc}>
+            <PlayBackdrop>
+              <PlayButton
+                onClick={() => handleOnClick()}
+                playing={indexPlaying === -1}
+                done={playedArray.size === limit}
+              />
+              <CircleOfCompletionContainer>
+                {pageSounds.map((sound, index) => (
+                  <CircleOfCompletion
+                    completed={playedArray.has(
+                      `audio_tag_page${pageNumber}-${index}`
+                    )}
+                  />
+                ))}
+              </CircleOfCompletionContainer>
+            </PlayBackdrop>
+          </ImageWrapper>
+        </Cover>
+        <Table>
+          {pageSounds.map((sound, index) => (
+            <>
+              <Player>
+                <audio
+                  id={`audio_tag_page${pageNumber}-${index}`}
+                  src={sound}
+                />
+                <Icon
+                  disabled={indexPlaying !== -1 && indexPlaying !== index}
+                  src={determineState(index, Stop, Replay, Play) as string}
+                  onClick={
+                    indexPlaying !== -1 && indexPlaying !== index // Something is playing and it is not the one clicked
+                      ? undefined
+                      : () => handleOnClick(index)
+                  }
+                />
+                <ProgressBar
+                  $done={playedArray.has(
                     `audio_tag_page${pageNumber}-${index}`
                   )}
+                  max={audioDuration}
+                  value={
+                    determineState(
+                      index,
+                      audioCurrentTime,
+                      audioDuration,
+                      0
+                    ) as number
+                  }
                 />
-              ))}
-            </CircleOfCompletionContainer>
-          </PlayBackdrop>
-        </ImageWrapper>
-      </Cover>
-      <Table>
-        {pageSounds.map((sound, index) => (
-          <>
-            <Player>
-              <audio id={`audio_tag_page${pageNumber}-${index}`} src={sound} />
-              <Icon
-                disabled={indexPlaying !== -1 && indexPlaying !== index}
-                src={determineState(index, Stop, Replay, Play) as string}
-                onClick={
-                  indexPlaying !== -1 && indexPlaying !== index // Something is playing and it is not the one clicked
-                    ? undefined
-                    : () => handleOnClick(index)
-                }
-              />
-              <ProgressBar
-                $done={playedArray.has(`audio_tag_page${pageNumber}-${index}`)}
-                max={audioDuration}
-                value={
-                  determineState(
-                    index,
-                    audioCurrentTime,
-                    audioDuration,
-                    0
-                  ) as number
-                }
-              />
-            </Player>
-            {index < pageSounds.length - 1 && <HorizontalLine />}
-          </>
-        ))}
-      </Table>
-    </CardWrapper>
+              </Player>
+              {index < pageSounds.length - 1 && <HorizontalLine />}
+            </>
+          ))}
+        </Table>
+      </CardWrapper>
+      <PageNumber>Page {pageNumber + 1}</PageNumber>
+    </>
   );
 };
