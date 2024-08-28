@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Replay from "./play-icon-rotate.svg";
 import Play from "./play-solid-icon.svg";
 import Stop from "./stop-icon-solid.svg";
+import posthog from "posthog-js";
 
 import { PlayButton } from "./PlayButton";
 
@@ -17,7 +18,7 @@ const CardWrapper = styled.div`
   padding: 30px;
   width: 90%;
   margin: auto;
-  margin-top: 20vh;
+  margin-top: 30vh;
   margin-bottom: 75px;
 
   max-height: 400px;
@@ -156,10 +157,8 @@ const HorizontalLine = styled.hr`
   opacity: 0.6;
 `;
 
-const PageNumber = styled.h4`
-  display: flex;
-  align-items: center;
-  justify-content: center;
+const PageNumber = styled.span`
+  margin-top: 15px;
 `;
 
 export const Card: React.FC<{
@@ -199,7 +198,13 @@ export const Card: React.FC<{
     if (indexPlaying === index) {
       audio.pause();
       setIndexPlaying(-1);
+      posthog.capture("audio status", {
+        status: "paused",
+      });
     } else {
+      posthog.capture("audio status", {
+        status: "play",
+      });
       audio.currentTime = 0;
       setAudioDuration(audio.duration);
 
@@ -217,6 +222,9 @@ export const Card: React.FC<{
         );
         setIndexPlaying(-1);
         setCounter((prev) => (prev < limit ? prev + 1 : prev));
+        if (playedArray.size === limit) {
+          console.log("limit hit");
+        }
       });
     }
   };
@@ -239,6 +247,28 @@ export const Card: React.FC<{
     return audioStopped;
   };
 
+  const handleFromMainButtonPress = () => {
+    handleOnClick();
+    posthog.capture("button press", {
+      button: "main button",
+    });
+  };
+
+  const handleFromTableButtonPress = (index: number) => {
+    handleOnClick(index);
+    posthog.capture("button press", {
+      button: "table play button",
+    });
+  };
+
+  React.useEffect(() => {
+    if (playedArray.size === limit) {
+      posthog.capture("all sounds have been played", {
+        page: pageNumber,
+      });
+    }
+  }, [playedArray.size]);
+
   // Reset when the cards are swiped
   React.useEffect(() => {
     if (wasSwiped) {
@@ -255,13 +285,14 @@ export const Card: React.FC<{
           <ImageWrapper $url={imageSrc}>
             <PlayBackdrop>
               <PlayButton
-                onClick={() => handleOnClick()}
+                onClick={handleFromMainButtonPress}
                 playing={indexPlaying === -1}
                 done={playedArray.size === limit}
               />
               <CircleOfCompletionContainer>
                 {pageSounds.map((sound, index) => (
                   <CircleOfCompletion
+                    key={index}
                     completed={playedArray.has(
                       `audio_tag_page${pageNumber}-${index}`
                     )}
@@ -273,7 +304,7 @@ export const Card: React.FC<{
         </Cover>
         <Table>
           {pageSounds.map((sound, index) => (
-            <>
+            <div key={index}>
               <Player>
                 <audio
                   id={`audio_tag_page${pageNumber}-${index}`}
@@ -285,7 +316,7 @@ export const Card: React.FC<{
                   onClick={
                     indexPlaying !== -1 && indexPlaying !== index // Something is playing and it is not the one clicked
                       ? undefined
-                      : () => handleOnClick(index)
+                      : () => handleFromTableButtonPress(index)
                   }
                 />
                 <ProgressBar
@@ -304,11 +335,11 @@ export const Card: React.FC<{
                 />
               </Player>
               {index < pageSounds.length - 1 && <HorizontalLine />}
-            </>
+            </div>
           ))}
         </Table>
+        <PageNumber>{pageNumber + 1}</PageNumber>
       </CardWrapper>
-      <PageNumber>Page {pageNumber + 1}</PageNumber>
     </>
   );
 };
