@@ -45,7 +45,6 @@ const Sound: React.FC<{}> = () => {
   const [wasSwiped, setWasSwiped] = useState(false);
 
   const handleAfterSwipe = (previousSlide: number) => {
-    navigator.vibrate(200);
     const audio = document.getElementById(
       `audio_tag_page${previousSlide}-${counter}`
     ) as HTMLAudioElement;

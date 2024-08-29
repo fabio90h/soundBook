@@ -267,7 +267,7 @@ export const Card: React.FC<{
         page: pageNumber,
       });
     }
-  }, [playedArray.size]);
+  }, [limit, pageNumber, playedArray.size]);
 
   // Reset when the cards are swiped
   React.useEffect(() => {
