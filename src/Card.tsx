@@ -80,11 +80,11 @@ const ImageWrapper = styled.div<{ $url: string }>`
 
 const Table = styled.div`
   width: 90%;
-  overflow-y: scroll;
+  /* overflow-y: scroll; */
 
   z-index: 1;
 
-  height: 100px;
+  height: 35px;
 `;
 
 const Icon = styled.img<{ disabled: boolean }>`
