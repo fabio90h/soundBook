@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Replay from "./play-icon-rotate.svg";
 import Play from "./play-solid-icon.svg";
 import Stop from "./stop-icon-solid.svg";
+import posthog from "posthog-js";
 
 import { PlayButton } from "./PlayButton";
 
@@ -40,7 +41,7 @@ const ImageWrapper = styled.div<{ $url: string }>`
 
   background-image: url(${(props) => props.$url});
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 110%;
   background-position: center;
 
   flex-shrink: 0;
@@ -79,11 +80,11 @@ const ImageWrapper = styled.div<{ $url: string }>`
 
 const Table = styled.div`
   width: 90%;
-  overflow-y: scroll;
+  /* overflow-y: scroll; */
 
   z-index: 1;
 
-  height: 100px;
+  height: 35px;
 `;
 
 const Icon = styled.img<{ disabled: boolean }>`
@@ -156,6 +157,10 @@ const HorizontalLine = styled.hr`
   opacity: 0.6;
 `;
 
+const PageNumber = styled.span`
+  margin-top: 15px;
+`;
+
 export const Card: React.FC<{
   pageNumber: number;
   pageSounds: string[];
@@ -193,7 +198,13 @@ export const Card: React.FC<{
     if (indexPlaying === index) {
       audio.pause();
       setIndexPlaying(-1);
+      posthog.capture("audio status", {
+        status: "paused",
+      });
     } else {
+      posthog.capture("audio status", {
+        status: "play",
+      });
       audio.currentTime = 0;
       setAudioDuration(audio.duration);
 
@@ -211,6 +222,9 @@ export const Card: React.FC<{
         );
         setIndexPlaying(-1);
         setCounter((prev) => (prev < limit ? prev + 1 : prev));
+        if (playedArray.size === limit) {
+          console.log("limit hit");
+        }
       });
     }
   };
@@ -233,6 +247,28 @@ export const Card: React.FC<{
     return audioStopped;
   };
 
+  const handleFromMainButtonPress = () => {
+    handleOnClick();
+    posthog.capture("button press", {
+      button: "main button",
+    });
+  };
+
+  const handleFromTableButtonPress = (index: number) => {
+    handleOnClick(index);
+    posthog.capture("button press", {
+      button: "table play button",
+    });
+  };
+
+  React.useEffect(() => {
+    if (playedArray.size === limit) {
+      posthog.capture("all sounds have been played", {
+        page: pageNumber,
+      });
+    }
+  }, [limit, pageNumber, playedArray.size]);
+
   // Reset when the cards are swiped
   React.useEffect(() => {
     if (wasSwiped) {
@@ -243,58 +279,67 @@ export const Card: React.FC<{
   }, [setWasSwiped, wasSwiped]);
 
   return (
-    <CardWrapper id={`${pageNumber}`}>
-      <Cover>
-        <ImageWrapper $url={imageSrc}>
-          <PlayBackdrop>
-            <PlayButton
-              onClick={() => handleOnClick()}
-              playing={indexPlaying === -1}
-              done={playedArray.size === limit}
-            />
-            <CircleOfCompletionContainer>
-              {pageSounds.map((sound, index) => (
-                <CircleOfCompletion
-                  completed={playedArray.has(
+    <>
+      <CardWrapper id={`${pageNumber}`}>
+        <Cover>
+          <ImageWrapper $url={imageSrc}>
+            <PlayBackdrop>
+              <PlayButton
+                onClick={handleFromMainButtonPress}
+                playing={indexPlaying === -1}
+                done={playedArray.size === limit}
+              />
+              <CircleOfCompletionContainer>
+                {pageSounds.map((sound, index) => (
+                  <CircleOfCompletion
+                    key={index}
+                    completed={playedArray.has(
+                      `audio_tag_page${pageNumber}-${index}`
+                    )}
+                  />
+                ))}
+              </CircleOfCompletionContainer>
+            </PlayBackdrop>
+          </ImageWrapper>
+        </Cover>
+        <Table>
+          {pageSounds.map((sound, index) => (
+            <div key={index}>
+              <Player>
+                <audio
+                  id={`audio_tag_page${pageNumber}-${index}`}
+                  src={sound}
+                />
+                <Icon
+                  disabled={indexPlaying !== -1 && indexPlaying !== index}
+                  src={determineState(index, Stop, Replay, Play) as string}
+                  onClick={
+                    indexPlaying !== -1 && indexPlaying !== index // Something is playing and it is not the one clicked
+                      ? undefined
+                      : () => handleFromTableButtonPress(index)
+                  }
+                />
+                <ProgressBar
+                  $done={playedArray.has(
                     `audio_tag_page${pageNumber}-${index}`
                   )}
+                  max={audioDuration}
+                  value={
+                    determineState(
+                      index,
+                      audioCurrentTime,
+                      audioDuration,
+                      0
+                    ) as number
+                  }
                 />
-              ))}
-            </CircleOfCompletionContainer>
-          </PlayBackdrop>
-        </ImageWrapper>
-      </Cover>
-      <Table>
-        {pageSounds.map((sound, index) => (
-          <>
-            <Player>
-              <audio id={`audio_tag_page${pageNumber}-${index}`} src={sound} />
-              <Icon
-                disabled={indexPlaying !== -1 && indexPlaying !== index}
-                src={determineState(index, Stop, Replay, Play) as string}
-                onClick={
-                  indexPlaying !== -1 && indexPlaying !== index // Something is playing and it is not the one clicked
-                    ? undefined
-                    : () => handleOnClick(index)
-                }
-              />
-              <ProgressBar
-                $done={playedArray.has(`audio_tag_page${pageNumber}-${index}`)}
-                max={audioDuration}
-                value={
-                  determineState(
-                    index,
-                    audioCurrentTime,
-                    audioDuration,
-                    0
-                  ) as number
-                }
-              />
-            </Player>
-            {index < pageSounds.length - 1 && <HorizontalLine />}
-          </>
-        ))}
-      </Table>
-    </CardWrapper>
+              </Player>
+              {index < pageSounds.length - 1 && <HorizontalLine />}
+            </div>
+          ))}
+        </Table>
+        <PageNumber>{pageNumber + 1}</PageNumber>
+      </CardWrapper>
+    </>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { pagesAssets } from "./data";
+import posthog from "posthog-js";
 
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
@@ -27,10 +28,10 @@ const responsive = {
 
 /**
  * TODO:
- * - Change the custom button from play to pause
- * - Need to add image to the pages (need to remove the text)
- * - Custom Button to be on the bottom of the page
- * - Custom Button changes color when completed
+ * - Change the custom button from play to pause [DONE]
+ * - Need to add image to the pages (need to remove the text) [DONE]
+ * - Custom Button to be on the bottom of the page [DONE]
+ * - Custom Button changes color when completed [DONE]
  *
  * - Main button plays and goes to the next track [DONE]
  * - Swipe right goes to the next page [DONE]
@@ -55,6 +56,10 @@ const Sound: React.FC<{}> = () => {
 
     setWasSwiped(true);
     setCounter(0);
+
+    posthog.capture("page swiped", {
+      pageSwipedFrom: previousSlide,
+    });
   };
 
   return (
