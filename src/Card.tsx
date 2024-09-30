@@ -49,7 +49,10 @@ const ImageWrapper = styled.div<{ $url: string }>`
   z-index: 2;
   border-radius: 15px;
 
-  &:after {
+  /* box-shadow: 0px 15px 35px -5px rgba(50, 88, 130, 0.32); */
+  box-shadow: 0px 10px 40px 0px rgba(76, 70, 124, 0.5);
+
+  /* &:after {
     content: "";
     background: inherit;
     width: 100%;
@@ -59,9 +62,9 @@ const ImageWrapper = styled.div<{ $url: string }>`
     z-index: 2;
     position: absolute;
     border-radius: 15px;
-  }
+  } */
 
-  &:before {
+  /* &:before {
     content: "";
     background: inherit;
     width: 100%;
@@ -75,12 +78,11 @@ const ImageWrapper = styled.div<{ $url: string }>`
     filter: blur(10px);
     opacity: 0.9;
     border-radius: 15px;
-  }
+  } */
 `;
 
 const Table = styled.div`
   width: 90%;
-  /* overflow-y: scroll; */
 
   z-index: 1;
 
