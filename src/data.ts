@@ -4,7 +4,7 @@ type PageAsset = {
 };
 
 export const pagesAssets: PageAsset[] = [];
-for (let slide = 2; slide < 36; slide++) {
+for (let slide = 1; slide < 36; slide++) {
   let sounds = [];
   try {
     const sound = require(`./assets/slides/${slide}/${slide}.mp3`);
@@ -13,7 +13,7 @@ for (let slide = 2; slide < 36; slide++) {
     console.error(e);
   }
   pagesAssets.push({
-    imageSrc: require(`./assets/slides/${slide}/${slide}.png`),
+    imageSrc: require(`./assets/slides/${slide}/${slide}.jpg`),
     sounds,
   });
 }
